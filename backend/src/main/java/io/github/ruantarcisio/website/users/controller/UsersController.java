@@ -2,6 +2,7 @@ package io.github.ruantarcisio.website.users.controller;
 
 import io.github.ruantarcisio.website.config.ApplicationProperties;
 import io.github.ruantarcisio.website.users.data.CreateUserRequest;
+import io.github.ruantarcisio.website.users.data.ForgotPasswordRequest;
 import io.github.ruantarcisio.website.users.data.UserResponse;
 import io.github.ruantarcisio.website.users.service.UserService;
 import jakarta.validation.Valid;
@@ -36,5 +37,14 @@ public class UsersController {
   public RedirectView verifyEmail(@RequestParam String token) {
     userService.verifyEmail(token);
     return new RedirectView(applicationProperties.getLoginPageUrl());
+  }
+
+  /**
+   * Request a password reset email
+   */
+  @PostMapping("/forgot-password")
+  public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+    userService.forgotPassword(req.getEmail());
+    return ResponseEntity.ok().build();
   }
 }

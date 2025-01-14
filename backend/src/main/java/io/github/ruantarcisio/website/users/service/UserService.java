@@ -1,10 +1,13 @@
 package io.github.ruantarcisio.website.users.service;
 
+import io.github.ruantarcisio.website.users.PasswordResetToken;
 import io.github.ruantarcisio.website.users.User;
 import io.github.ruantarcisio.website.users.VerificationCode;
 import io.github.ruantarcisio.website.users.data.CreateUserRequest;
 import io.github.ruantarcisio.website.users.data.UserResponse;
+import io.github.ruantarcisio.website.users.jobs.SendResetPasswordEmailJob;
 import io.github.ruantarcisio.website.users.jobs.SendWelcomeEmailJob;
+import io.github.ruantarcisio.website.users.repository.PasswordResetTokenRepository;
 import io.github.ruantarcisio.website.users.repository.UserRepository;
 import io.github.ruantarcisio.website.users.repository.VerificationCodeRepository;
 import io.github.ruantarcisio.website.util.exception.ApiException;
@@ -20,6 +23,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final VerificationCodeRepository verificationCodeRepository;
+  private final PasswordResetTokenRepository passwordResetTokenRepository;
 
   @Transactional
   public UserResponse create(@Valid CreateUserRequest request) {
@@ -45,5 +49,15 @@ public class UserService {
     user.setVerified(true);
     userRepository.save(user);
     verificationCodeRepository.delete(verificationCode);
+  }
+
+  @Transactional
+  public void forgotPassword(String email) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> ApiException.builder().status(404).message("User not found").build());
+    PasswordResetToken passwordResetToken = new PasswordResetToken(user);
+    passwordResetTokenRepository.save(passwordResetToken);
+    SendResetPasswordEmailJob sendResetPasswordEmailJob = new SendResetPasswordEmailJob(passwordResetToken.getId());
+    BackgroundJobRequest.enqueue(sendResetPasswordEmailJob);
   }
 }
