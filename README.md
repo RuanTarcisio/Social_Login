@@ -1,5 +1,5 @@
 <h1>📚 <strong>Estudo de Autenticação com OAuth e Envio de E-mails</strong></h1>
-<p>Este projeto tem como objetivo implementar uma página de login no <strong>front-end</strong> e um <strong>back-end</strong> para autenticação de usuários usando <strong>OAuth2</strong> (Google e GitHub), além de enviar e-mails de redefinição de senha.</p>
+<p>Este projeto tem como objetivo implementar uma página de login no <strong>front-end</strong> e um <strong>back-end</strong> para autenticação de usuários usando <strong>OAuth2</strong> (Google e GitHub), além de enviar e-mails de redefinição de senha e salvar imagens no <strong>Amazon S3</strong>.</p>
 
 <hr>
 
@@ -10,6 +10,7 @@
     <li><strong>Autenticação</strong>: OAuth2 (Google, GitHub), JWT (JSON Web Token)</li>
     <li><strong>Envio de E-mails</strong>: JavaMail API, Thymeleaf</li>
     <li><strong>Banco de Dados</strong>: <a href="https://www.mysql.com/" target="_blank">MySQL</a></li>
+    <li><strong>Armazenamento de Imagens</strong>: <a href="https://aws.amazon.com/s3/" target="_blank">Amazon S3</a></li>
 </ul>
 
 <hr>
@@ -31,5 +32,8 @@
     <li>Recuperação de senha.</li>
 </ul>
 
-<h3>4. Página de Login:</h3>
-<p>Interface simples de login com opções para login via <strong>Google</strong> ou <strong>GitHub</strong>.</p>
+<h3>4. Armazenamento de Imagens:</h3>
+<p>O sistema utiliza o <strong>Amazon S3</strong> para salvar e gerenciar imagens de forma segura e eficiente.</p>
+
+<h3>5. Página de Login:</h3>
+<p>Interface simples de login com opções para login via <strong>API</strong> <strong>Google</strong> ou <strong>GitHub</strong>.</p>
