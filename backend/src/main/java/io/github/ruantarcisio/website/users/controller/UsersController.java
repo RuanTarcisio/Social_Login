@@ -3,6 +3,7 @@ package io.github.ruantarcisio.website.users.controller;
 import io.github.ruantarcisio.website.config.ApplicationProperties;
 import io.github.ruantarcisio.website.users.data.CreateUserRequest;
 import io.github.ruantarcisio.website.users.data.ForgotPasswordRequest;
+import io.github.ruantarcisio.website.users.data.UpdateUserPasswordRequest;
 import io.github.ruantarcisio.website.users.data.UserResponse;
 import io.github.ruantarcisio.website.users.service.UserService;
 import jakarta.validation.Valid;
@@ -45,6 +46,18 @@ public class UsersController {
   @PostMapping("/forgot-password")
   public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
     userService.forgotPassword(req.getEmail());
+    return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Reset the password of an existing user, uses the password reset token
+   * <p>
+   * Only allowed with the password reset token
+   */
+  @PatchMapping("/reset-password")
+  public ResponseEntity<Void> resetPassword(
+          @Valid @RequestBody UpdateUserPasswordRequest requestDTO) {
+    userService.resetPassword(requestDTO);
     return ResponseEntity.ok().build();
   }
 }

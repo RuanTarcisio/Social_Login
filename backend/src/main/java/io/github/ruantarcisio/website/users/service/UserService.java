@@ -4,6 +4,7 @@ import io.github.ruantarcisio.website.users.PasswordResetToken;
 import io.github.ruantarcisio.website.users.User;
 import io.github.ruantarcisio.website.users.VerificationCode;
 import io.github.ruantarcisio.website.users.data.CreateUserRequest;
+import io.github.ruantarcisio.website.users.data.UpdateUserPasswordRequest;
 import io.github.ruantarcisio.website.users.data.UserResponse;
 import io.github.ruantarcisio.website.users.jobs.SendResetPasswordEmailJob;
 import io.github.ruantarcisio.website.users.jobs.SendWelcomeEmailJob;
@@ -59,5 +60,17 @@ public class UserService {
     passwordResetTokenRepository.save(passwordResetToken);
     SendResetPasswordEmailJob sendResetPasswordEmailJob = new SendResetPasswordEmailJob(passwordResetToken.getId());
     BackgroundJobRequest.enqueue(sendResetPasswordEmailJob);
+  }
+
+  @Transactional
+  public void resetPassword(UpdateUserPasswordRequest request) {
+    PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(request.getPasswordResetToken())
+            .orElseThrow(() -> ApiException.builder().status(404).message("Password reset token not found").build());
+    if (passwordResetToken.isExpired()) {
+      throw ApiException.builder().status(400).message("Password reset token is expired").build();
+    }
+    User user = passwordResetToken.getUser();
+    user.updatePassword(request.getPassword());
+    userRepository.save(user);
   }
 }
