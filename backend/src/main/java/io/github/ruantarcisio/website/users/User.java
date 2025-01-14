@@ -10,7 +10,13 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * User is an entity that can be authenticated and authorized to access the application.
@@ -18,26 +24,56 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User extends AbstractEntity {
-  private String email;
-  private String password;
-  private String firstName;
-  private String lastName;
-  private boolean verified = false;
-  @Enumerated(EnumType.STRING)
-  private Role role;
+public class User extends AbstractEntity implements UserDetails {
+    private String email;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private boolean verified = false;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-  @Setter
-  @OneToOne(mappedBy = "user")
-  private VerificationCode verificationCode;
+    @Setter
+    @OneToOne(mappedBy = "user")
+    private VerificationCode verificationCode;
 
 
-  public User(CreateUserRequest data) {
-    PasswordEncoder passwordEncoder = ApplicationContextProvider.bean(PasswordEncoder.class);
-    this.email = data.getEmail();
-    this.password = passwordEncoder.encode(data.getPassword());
-    this.firstName = data.getFirstName();
-    this.lastName = data.getLastName();
-    this.role = Role.USER;
-  }
+    public User(CreateUserRequest data) {
+        PasswordEncoder passwordEncoder = ApplicationContextProvider.bean(PasswordEncoder.class);
+        this.email = data.getEmail();
+        this.password = passwordEncoder.encode(data.getPassword());
+        this.firstName = data.getFirstName();
+        this.lastName = data.getLastName();
+        this.role = Role.USER;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
