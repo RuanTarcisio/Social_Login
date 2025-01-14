@@ -7,6 +7,7 @@ import io.github.ruantarcisio.website.users.data.UserResponse;
 import io.github.ruantarcisio.website.users.jobs.SendWelcomeEmailJob;
 import io.github.ruantarcisio.website.users.repository.UserRepository;
 import io.github.ruantarcisio.website.users.repository.VerificationCodeRepository;
+import io.github.ruantarcisio.website.util.exception.ApiException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jobrunr.scheduling.BackgroundJobRequest;
@@ -34,5 +35,15 @@ public class UserService {
     verificationCodeRepository.save(verificationCode);
     SendWelcomeEmailJob sendWelcomEmailJob = new SendWelcomeEmailJob(user.getId());
     BackgroundJobRequest.enqueue(sendWelcomEmailJob);
+  }
+
+  @Transactional
+  public void verifyEmail(String code) {
+    VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
+            .orElseThrow(() -> ApiException.builder().status(400).message("Invalid token").build());
+    User user = verificationCode.getUser();
+    user.setVerified(true);
+    userRepository.save(user);
+    verificationCodeRepository.delete(verificationCode);
   }
 }

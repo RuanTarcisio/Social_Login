@@ -29,6 +29,7 @@ public class User extends AbstractEntity implements UserDetails {
     private String password;
     private String firstName;
     private String lastName;
+    @Setter
     private boolean verified = false;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -72,6 +73,8 @@ public class User extends AbstractEntity implements UserDetails {
         return true;
     }
 
+    // If you want to not allow the user to login before verifying their email, you can change this to
+    // return verified;
     @Override
     public boolean isEnabled() {
         return true;
