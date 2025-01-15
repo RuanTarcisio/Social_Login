@@ -1,10 +1,12 @@
 package io.github.ruantarcisio.website.users.service;
 
+import io.github.ruantarcisio.website.auth.SecurityUtil;
 import io.github.ruantarcisio.website.users.PasswordResetToken;
 import io.github.ruantarcisio.website.users.User;
 import io.github.ruantarcisio.website.users.VerificationCode;
 import io.github.ruantarcisio.website.users.data.CreateUserRequest;
 import io.github.ruantarcisio.website.users.data.UpdateUserPasswordRequest;
+import io.github.ruantarcisio.website.users.data.UpdateUserRequest;
 import io.github.ruantarcisio.website.users.data.UserResponse;
 import io.github.ruantarcisio.website.users.jobs.SendResetPasswordEmailJob;
 import io.github.ruantarcisio.website.users.jobs.SendWelcomeEmailJob;
@@ -15,6 +17,7 @@ import io.github.ruantarcisio.website.util.exception.ApiException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jobrunr.scheduling.BackgroundJobRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final VerificationCodeRepository verificationCodeRepository;
   private final PasswordResetTokenRepository passwordResetTokenRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Transactional
   public UserResponse create(@Valid CreateUserRequest request) {
@@ -72,5 +76,24 @@ public class UserService {
     User user = passwordResetToken.getUser();
     user.updatePassword(request.getPassword());
     userRepository.save(user);
+  }
+
+  @Transactional
+  public UserResponse update(UpdateUserRequest request) {
+    User user = SecurityUtil.getAuthenticatedUser();
+    user = userRepository.getReferenceById(user.getId());
+    user.update(request);
+    user = userRepository.save(user);
+    return new UserResponse(user);
+  }
+  @Transactional
+  public UserResponse updatePassword(UpdateUserPasswordRequest request) {
+    User user = SecurityUtil.getAuthenticatedUser();
+    if (user.getPassword() != null && !passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+      throw ApiException.builder().status(400).message("Wrong password").build();
+    }
+    user.updatePassword(request.getPassword());
+    user = userRepository.save(user);
+    return new UserResponse(user);
   }
 }

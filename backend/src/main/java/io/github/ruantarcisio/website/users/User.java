@@ -2,6 +2,7 @@ package io.github.ruantarcisio.website.users;
 
 import io.github.ruantarcisio.website.entity.AbstractEntity;
 import io.github.ruantarcisio.website.users.data.CreateUserRequest;
+import io.github.ruantarcisio.website.users.data.UpdateUserRequest;
 import io.github.ruantarcisio.website.util.ApplicationContextProvider;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,6 +47,11 @@ public class User extends AbstractEntity implements UserDetails {
         this.firstName = data.getFirstName();
         this.lastName = data.getLastName();
         this.role = Role.USER;
+    }
+
+    public void update(UpdateUserRequest request) {
+        this.firstName = request.getFirstName();
+        this.lastName = request.getLastName();
     }
 
     public void updatePassword(String newPassword) {
