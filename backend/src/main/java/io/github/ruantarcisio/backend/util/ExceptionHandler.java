@@ -1,21 +1,23 @@
 package io.github.ruantarcisio.backend.util;
 
-import io.github.ruantarcisio.backend.util.exception.ApiException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.github.ruantarcisio.backend.util.exception.ApiException;
 
 @ControllerAdvice
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
@@ -47,6 +49,13 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
         var response = HttpErrorResponse.of(e.getMessage(), e.getStatus(), e.getErrors(), null);
         return new ResponseEntity<>(response, HttpStatus.valueOf(e.getStatus()));
     }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<HttpErrorResponse> handleException(BadCredentialsException e) {
+    log.info("Handling BadCredentialsException: {}", e.getMessage());
+    var response = HttpErrorResponse.of(e.getMessage(), 401, null, null);
+    return new ResponseEntity<>(response, HttpStatus.valueOf(401));
+  }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
     public ResponseEntity<HttpErrorResponse> handleException(Exception e) {
