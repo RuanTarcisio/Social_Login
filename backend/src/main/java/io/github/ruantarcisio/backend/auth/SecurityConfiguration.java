@@ -6,6 +6,7 @@ import io.github.ruantarcisio.backend.config.ApplicationProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,26 +23,39 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfiguration {
 
   private final ApplicationProperties applicationProperties;
   private final UserDetailsService userDetailsService;
+  private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(customizer -> {
       customizer
-              .requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
-              .requestMatchers(antMatcher(HttpMethod.GET, "/api/users/verify-email")).permitAll()
-              .requestMatchers(antMatcher(HttpMethod.POST, "/api/users/forgot-password")).permitAll()
-              .requestMatchers(antMatcher(HttpMethod.PATCH, "/api/users/reset-password")).permitAll()
-              .requestMatchers(antMatcher(HttpMethod.POST, "/api/auth/login")).permitAll()
+              .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+              .requestMatchers(HttpMethod.GET, "/api/users/verify-email").permitAll()
+              .requestMatchers(HttpMethod.POST, "/api/users/forgot-password").permitAll()
+              .requestMatchers(HttpMethod.PATCH, "/api/users/reset-password").permitAll()
+              .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+              .requestMatchers(HttpMethod.GET, "/api/auth/teste").permitAll()
+              .requestMatchers("/oauth2/authorization/google").permitAll()
+
               .anyRequest().authenticated();
     });
 
+    http.oauth2Login(customizer -> {
+      customizer.successHandler(oauth2LoginSuccessHandler);
+      customizer.failureHandler((request, response, exception) -> {
+        log.error("OAuth2 Authentication failed", exception);
+        response.sendRedirect("/login?error=true");});
+    });
+    
     http.exceptionHandling(customizer -> {
       customizer.authenticationEntryPoint(
               (request, response, authException) -> {
@@ -73,7 +87,7 @@ public class SecurityConfiguration {
       @Override
       public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(applicationProperties.getAllowedOrigins());
+        config.setAllowedOrigins(List.of("http://localhost"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

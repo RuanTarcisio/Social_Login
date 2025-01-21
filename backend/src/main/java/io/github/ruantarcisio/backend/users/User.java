@@ -1,5 +1,16 @@
 package io.github.ruantarcisio.backend.users;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import io.github.ruantarcisio.backend.entity.AbstractEntity;
 import io.github.ruantarcisio.backend.users.data.CreateUserRequest;
 import io.github.ruantarcisio.backend.users.data.UpdateUserRequest;
@@ -7,20 +18,16 @@ import io.github.ruantarcisio.backend.util.ApplicationContextProvider;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Collection;
-import java.util.Collections;
 
 /**
- * User is an entity that can be authenticated and authorized to access the application.
+ * User is an entity that can be authenticated and authorized to access the
+ * application.
  */
 @Entity
 @Getter
@@ -41,6 +48,8 @@ public class User extends AbstractEntity implements UserDetails {
     @OneToOne(mappedBy = "user")
     private VerificationCode verificationCode;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<UserConnectedAccount> connectedAccounts = new ArrayList<>();
 
     public User(CreateUserRequest data) {
         PasswordEncoder passwordEncoder = ApplicationContextProvider.bean(PasswordEncoder.class);
@@ -49,6 +58,27 @@ public class User extends AbstractEntity implements UserDetails {
         this.firstName = data.getFirstName();
         this.lastName = data.getLastName();
         this.role = Role.USER;
+    }
+
+    public User(OAuth2User oAuth2User) {
+        User user = new User();
+        user.email = oAuth2User.getAttribute("email");
+        String name = oAuth2User.getAttribute("name");
+        if (name != null) {
+            List<String> names = List.of(name.split(" "));
+            if (names.size() > 1) {
+                user.firstName = names.get(0);
+                user.lastName = names.get(1);
+            } else {
+                user.firstName = names.get(0);
+            }
+        }
+        user.verified = true;
+        user.role = Role.USER;
+    }
+
+    public void addConnectedAccount(UserConnectedAccount connectedAccount) {
+        connectedAccounts.add(connectedAccount);
     }
 
     public void update(UpdateUserRequest request) {
@@ -86,7 +116,8 @@ public class User extends AbstractEntity implements UserDetails {
         return true;
     }
 
-    // If you want to not allow the user to login before verifying their email, you can change this to
+    // If you want to not allow the user to login before verifying their email, you
+    // can change this to
     // return verified;
     @Override
     public boolean isEnabled() {
