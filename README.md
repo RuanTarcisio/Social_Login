@@ -21,11 +21,11 @@
     <strong>
         Como executar:
     </strong>
-        <strong>1º</strong> Clone o repositório: git@github.com:RuanTarcisio/Social_Login.git | https://github.com/RuanTarcisio/Social_Login.git
-        <strong>2º</strong> Vá até a pasta infra.
-        <strong>3º</strong> Execute o seguinte comando: docker compose up -d 
+        
 </h2>
-
+<li>Clone o repositório: https://github.com/RuanTarcisio/Social_Login.git | git@github.com:RuanTarcisio/Social_Login.git</li> 
+        <li>Vá até a pasta infra.</li> 
+        <li>Execute o seguinte comando: docker compose up -d </li> 
 <hr>
 
 <h2>🔑 <strong>Funcionalidades</strong></h2>
