@@ -3,6 +3,8 @@
 
 <hr>
 
+
+
 <h2>🚀 <strong>Tecnologias Utilizadas</strong></h2>
 <ul>
     <li><strong>Front-end</strong>: <a href="https://nextjs.org/" target="_blank">Next.js</a>, <a href="https://tailwindcss.com/" target="_blank">Tailwind CSS</a>, <a href="https://www.typescriptlang.org/" target="_blank">TypeScript</a></li>
@@ -12,6 +14,17 @@
     <li><strong>Banco de Dados</strong>: <a href="https://www.mysql.com/" target="_blank">MySQL</a></li>
     <li><strong>Armazenamento de Imagens</strong>: <a href="https://aws.amazon.com/s3/" target="_blank">Amazon S3</a></li>
 </ul>
+
+<hr>
+
+<h2>
+    <strong>
+        Como executar:
+    </strong>
+        <strong>1º</strong> Clone o repositório: git@github.com:RuanTarcisio/Social_Login.git | https://github.com/RuanTarcisio/Social_Login.git
+        <strong>2º</strong> Vá até a pasta infra.
+        <strong>3º</strong> Execute o seguinte comando: docker compose up -d 
+</h2>
 
 <hr>
 
